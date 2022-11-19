@@ -2,10 +2,11 @@ import os
 import pandas as pd
 files = os.listdir("data")
 full_df = pd.DataFrame(columns=["Date"])
-import datetime
+from datetime import datetime
 first_date = []
 def p2f(x):
-   return float(x.strip('%'))/100
+    x = x.replace(',', '')
+    return float(x.strip('%'))/100
 
 for file in files:
     if ".csv" in file:
@@ -19,14 +20,13 @@ for file in files:
         except: pass
         df["returns_{}".format(coin)] = pd.Series([p2f(x) for x in df['Change %']], index = df.index)
         df = df[["Date","returns_{}".format(coin)]]
-        last_date = df['Date'].iloc[-1]
-        tupl = tuple([coin, last_date])
+        first_avail_date = df['Date'].iloc[-1]
+        tupl = tuple([coin, first_avail_date])
         first_date.append(tupl)
-        if last_date >=
-        full_df = full_df.merge(df, on="Date", how="outer")
-
+        if first_avail_date <= datetime.strptime('2018-07-01', '%Y-%m-%d'):
+            full_df = full_df.merge(df, on="Date", how="outer")
 
 #print(full_df.head())
 full_df=full_df.dropna().reset_index(drop=True)
-print(full_)
-print(sorted(first_date, key = lambda x: x[1]))
+full_df.to_csv("coin_data.csv")
+
