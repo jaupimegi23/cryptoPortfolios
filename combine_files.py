@@ -18,8 +18,12 @@ for file in files:
         try:
             df["Date"] = pd.to_datetime(df['Date'], format='%b %d, %Y')
         except: pass
-        df = df[["Date","Open"]]
-        df = df.rename(columns={"Open":"price_{}".format(coin)})
+        df = df[["Date","Open","High","Low","Vol.","Change %"]]
+        df["returns_{}".format(coin)] = pd.Series([p2f(x) for x in df['Change %']], index = df.index)
+        df = df.rename(columns={"Vol.":"Volume_{}".format(coin)})
+        df = df.rename(columns={"Open":"Open_{}".format(coin)})
+        df = df.rename(columns={"High":"High_{}".format(coin)})
+        df = df.rename(columns={"Low":"Low_{}".format(coin)})
         first_avail_date = df['Date'].iloc[-1]
         tupl = tuple([coin, first_avail_date])
         first_date.append(tupl)
@@ -28,6 +32,7 @@ for file in files:
 
 
 full_df=full_df.dropna().reset_index(drop=True)
+full_df.sort_values('Date', ascending=True)
 print(full_df['Date'].iloc[-1])
 print(full_df.head())
 full_df.to_csv("price_data.csv")
