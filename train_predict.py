@@ -85,5 +85,5 @@ for coin in coins:
 
 
 # Save predictions
-val.to_csv("val.csv")
-test.to_csv("test.csv")
+val.to_csv("results/lm_val.csv")
+test.to_csv("results/lm_test.csv")
