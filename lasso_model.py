@@ -1,0 +1,35 @@
+from numpy import arange
+import pandas as pd
+from sklearn.linear_model import LassoCV
+from sklearn.model_selection import RepeatedKFold
+
+data = pd.read_csv("features.csv")
+open_cols = [col for col in data.columns if "Open" in col]
+coins = [col.split("_")[1] for col in open_cols]
+
+df_train = pd.read_csv("features_train.csv")
+df_test1 = pd.read_csv("features_val.csv")
+df_test2 = pd.read_csv("features_test.csv")
+
+for coin in coins:
+    coin_cols = [col for col in df_train.columns if coin in col]
+    #TRAINING
+    df_coin = df_train[coin_cols]
+    nrows = df_coin.shape[0]
+    train_X = df_coin.drop(columns="Log_RET_{}".format(coin))[65:nrows-1]
+    train_y = df_coin["Log_RET_{}".format(coin)][66:nrows]
+
+    #VALIDATION
+    df_coin_test = df_test1[coin_cols]
+    nrows = df_coin_test.shape[0]
+    test_X = df_coin_test.drop(columns="Log_RET_{}".format(coin))[0:nrows-1]
+    test_y = df_coin_test["Log_RET_{}".format(coin)][1:nrows]
+
+    cv = RepeatedKFold(n_splits=10, n_repeats=3, random_state=1)
+    model = LassoCV(alphas=arange(0, 1, 0.01), cv=cv, n_jobs=-1)
+    model.fit(train_X, train_y)
+    print(model.score(train_X, train_y))
+    print(model.score(test_X, test_y))
+
+    
+
