@@ -2,6 +2,7 @@ from numpy import arange
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import KFold
+import numpy as np
 
 data = pd.read_csv("features.csv")
 open_cols = [col for col in data.columns if "Open" in col]
@@ -27,6 +28,10 @@ for coin in coins:
     model = LinearRegression()
     model.fit(train_X, train_y)
     print(coin)
+    y_pred = model.predict(test_X)
+    y_pred = [np.nan] + list(y_pred)
+    df_coin_test["predicted_y"] = y_pred
+    df_coin_test.to_csv("{}_val_predictions.csv".format(coin))
     print(model.score(train_X, train_y))
     print(model.score(test_X, test_y))
 
