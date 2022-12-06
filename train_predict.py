@@ -15,10 +15,10 @@ data = data[65:].reset_index(drop=True)
 
 all_data = "TRUE"
 lookback = 100
-lookforward = 7
+lookforward = 1
 
-val_size = lookforward * 10
-test_size = lookforward * 10
+val_size = lookforward * 50
+test_size = lookforward * 50
 
 train = data[:-1][:-val_size-test_size]
 n_train = len(train)
