@@ -1,17 +1,28 @@
 from numpy import arange
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+from sklearn import tree
 from sklearn.model_selection import KFold
 import numpy as np
 from sklearn.metrics import r2_score
+from sklearn.preprocessing import StandardScaler
 
 data = pd.read_csv("features.csv")
 data = data.drop(data.columns[0], axis=1)
 n_all = data.shape[0]
-open_cols = [col for col in data.columns if "Open" in col]
-coins = [col.split("_")[1] for col in open_cols]
+log_ret_cols = [col for col in data.columns if "Log_RET_" in col]
+open_cols = [col for col in data.columns if "Open_" in col]
+coins = [col.split("Log_RET_")[1] for col in log_ret_cols]
+#coins = [col.split("Open_")[1] for col in open_cols]
 print(coins)
-data = data[65:].reset_index(drop=True)
+data = data[82:].reset_index(drop=True)
+
+data = data.drop(columns="Date")
+
+#standardize data
+#should standartise only on training data but just trying it out
+#scaler = StandardScaler()
+#data = pd.DataFrame(scaler.fit_transform(data), columns=data.columns)
 
 all_data = "TRUE"
 lookback = 100
@@ -35,8 +46,11 @@ for coin in coins:
     df_coin = data[coin_cols]
     x = df_coin.drop(columns="Log_RET_{}".format(coin))[:-1]
     y = df_coin["Log_RET_{}".format(coin)][1:]
+    #x = df_coin.drop(columns="Open_{}".format(coin))[:-1]
+    #y = df_coin["Open_{}".format(coin)][1:]
 
     model = LinearRegression()
+    #model = tree.DecisionTreeRegressor()
 
     nume = []
     deno = []
@@ -55,8 +69,10 @@ for coin in coins:
             deno.append((y_valid.values-y_train.mean())**2)
 
     val["Log_RET_{}_pred".format(coin)] = y_valid_hat_coin
+    #val["Open_{}_pred".format(coin)] = y_valid_hat_coin
 
     r2 = r2_score(val["Log_RET_{}".format(coin)][:-1], val["Log_RET_{}_pred".format(coin)][1:])
+    #r2 = r2_score(val["Open_{}".format(coin)][:-1], val["Open_{}_pred".format(coin)][1:])
     print("Validation R2 for {} is {}".format(coin, r2))
 
     nume = np.array(nume)
@@ -67,6 +83,7 @@ for coin in coins:
     print("Validation OSR2 for {} is {}".format(coin, osr2))
 
     mse = np.mean((val["Log_RET_{}".format(coin)][:-1] - val["Log_RET_{}_pred".format(coin)][1:])**2)
+    #mse = np.mean((val["Open_{}".format(coin)][:-1] - val["Open_{}_pred".format(coin)][1:])**2)
     print("Validation MSE for {} is {}".format(coin, mse))
 
     # Test
@@ -82,6 +99,7 @@ for coin in coins:
             y_test_hat_coin = np.append(y_test_hat_coin, y_test_hat_wind, axis=0)
 
     test["Log_RET_{}_pred".format(coin)] = y_test_hat_coin
+    #test["Open_{}_pred".format(coin)] = y_test_hat_coin
 
 
 # Save predictions
