@@ -96,8 +96,8 @@ for coin in coins:
 
 
 # Save predictions
-val.to_csv("results/sparse_val.csv")
-test.to_csv("results/sparse_test.csv")
+val.to_csv("results/xgb_val.csv")
+test.to_csv("results/xgb_test.csv")
 
 
 
